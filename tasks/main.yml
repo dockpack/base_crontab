@@ -1,0 +1,89 @@
+---
+
+- name: ensure cron daemon is enabled
+  service:
+    name: crond
+    enabled: true
+
+- name: ensure permissions on /etc/crontab are configured
+  file:
+    dest: /etc/crontab
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - permissions
+
+- name: ensure permissions on cron directories are configured
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  with_items:
+    - /etc/cron.hourly
+    - /etc/cron.daily
+    - /etc/cron.weekly
+    - /etc/cron.monthly
+    - /etc/cron.d
+  tags:
+    - permissions
+
+- name: remove /etc/at.deny
+  file:
+    path: /etc/at.deny
+    state: absent
+  tags:
+    - crontab
+
+- name: copy /etc/at.allow file
+  template:
+    src: at.allow.j2
+    dest: /etc/at.allow
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - crontab
+
+- name: remove /etc/cron.deny
+  file:
+    path: /etc/cron.deny
+    state: absent
+  tags:
+    - crontab
+
+- name: copy /etc/cron.allow file
+  template:
+    src: cron.allow.j2
+    dest: /etc/cron.allow
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - crontab
+
+- name: unconfigure jobs
+  cron:
+    name: "{{ item.name }}"
+    user: "{{ item.user | default('root') }}"
+    state: absent
+  with_items: "{{ cronjobs_that_need_to_be_absent }}"
+  when: cronjobs_that_need_to_be_absent is defined
+  tags:
+    - crontab
+
+- name: configure jobs
+  cron:
+    minute: "{{ item.value.minute | default('*') }}"
+    hour: "{{ item.value.hour | default('*') }}"
+    weekday: "{{ item.value.weekday | default('*') }}"
+    day: "{{ item.value.day | default('*') }}"
+    name: "{{ item.value.name }}"
+    user: "{{ item.value.user | default('nginx') }}"
+    job: "{{ item.value.command }}"
+    state: "{{ item.value.state | default('present') }}"
+  with_dict: "{{ cronjobs }}"
+  tags:
+    - crontab
