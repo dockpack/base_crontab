@@ -1,9 +1,36 @@
 ---
 
+- name: ensure directory exists
+  file:
+    path: /root
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - base_crontab
+
+- name: copy goss tests template
+  template:
+    src: test_cron.yml.j2
+    dest: /root/test_cron.yml
+  tags:
+    - base_crontab
+
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}{{ ansible_distribution_major_version }}.yml"
+
+- name: ensure cron package is installed
+  yum:
+    name: "{{ crontab_packages }}"
+    state: installed
+  notify: start cron
+
 - name: ensure cron daemon is enabled
   service:
     name: crond
     enabled: true
+    state: started
 
 - name: ensure permissions on /etc/crontab are configured
   file:
@@ -20,7 +47,8 @@
     state: directory
     owner: root
     group: root
-    mode: 0700
+    mode: go-rwx
+    recurse: true
   with_items:
     - /etc/cron.hourly
     - /etc/cron.daily
@@ -71,6 +99,7 @@
     state: absent
   with_items: "{{ cronjobs_that_need_to_be_absent }}"
   when: cronjobs_that_need_to_be_absent is defined
+  notify: start cron
   tags:
     - crontab
 
@@ -85,5 +114,6 @@
     job: "{{ item.value.command }}"
     state: "{{ item.value.state | default('present') }}"
   with_dict: "{{ cronjobs }}"
+  notify: start cron
   tags:
     - crontab
