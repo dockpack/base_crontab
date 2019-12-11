@@ -2,5 +2,5 @@
 
 - name: start cron
   service:
-    name: cron
+    name: crond
     state: started
