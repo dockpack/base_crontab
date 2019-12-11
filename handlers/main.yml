@@ -1,0 +1,6 @@
+---
+
+- name: start cron
+  service:
+    name: cron
+    state: started
