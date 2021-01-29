@@ -14,6 +14,7 @@
   template:
     src: test_cron.yml.j2
     dest: /root/test_cron.yml
+    mode: 0640
   tags:
     - base_crontab
 
