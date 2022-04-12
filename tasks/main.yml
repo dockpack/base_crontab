@@ -30,7 +30,7 @@
 
 - name: ensure cron daemon is enabled
   service:
-    name: crond
+    name: "{{ crond_service }}"
     enabled: true
     state: started
 
