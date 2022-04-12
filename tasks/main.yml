@@ -23,9 +23,9 @@
   include_vars: "{{ ansible_os_family }}{{ ansible_distribution_major_version }}.yml"
 
 - name: ensure cron package is installed
-  yum:
+  package:
     name: "{{ crontab_packages }}"
-    state: installed
+    state: present
   notify: start cron
 
 - name: ensure cron daemon is enabled
