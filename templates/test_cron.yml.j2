@@ -64,11 +64,9 @@ file:
     filetype: file
     contains: []
 package:
-  cronie:
-    installed: true
-  crontabs:
+  {{ crontab_packages[0] }}:
     installed: true
 service:
-  crond:
+  {{ crond_service }}:
     enabled: true
     running: true

@@ -1,18 +1,24 @@
 ---
-
+# Standards: 0.2
 galaxy_info:
+  role_name: base_crontab
   author: Bas Meijer
-  description: Crontab
-  company: bbaassssiiee
+  namespace: dockpack
+  description: role to install compliant crontab
 
   license: MIT
 
-  min_ansible_version: 2.4.0
+  min_ansible_version: 2.9.27
 
   platforms:
     - name: EL
       versions:
         - 7
+        - 8
+    - name: Debian
+      versions:
+        - buster
+        - bullseye
   galaxy_tags:
     - system
     - compliance
@@ -20,3 +26,4 @@ galaxy_info:
     - security
 
 dependencies: []
+...
