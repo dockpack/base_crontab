@@ -1,7 +1,7 @@
 ---
 
 - name: Start cron
-  service:
+  ansible.builtin.service:
     name: crond
     state: started
 ...

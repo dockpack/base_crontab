@@ -2,10 +2,10 @@
 
 - name: Include OS-specific variables.
   # yamllint disable-line rule:line-length
-  include_vars: "{{ ansible_os_family }}{{ ansible_distribution_major_version }}.yml"
+  ansible.builtin.include_vars: "{{ ansible_os_family }}{{ ansible_distribution_major_version }}.yml"
 
 - name: Ensure goss directory exists
-  file:
+  ansible.builtin.file:
     path: /etc/goss.d/
     state: directory
     owner: root
@@ -15,7 +15,7 @@
     - base_crontab
 
 - name: Copy goss tests template
-  template:
+  ansible.builtin.template:
     src: test_cron.yml.j2
     dest: /etc/goss.d/test_cron.yml
     mode: 0640
@@ -23,19 +23,19 @@
     - base_crontab
 
 - name: Ensure cron package is installed
-  package:
+  ansible.builtin.package:
     name: "{{ crontab_packages }}"
     state: present
   notify: Start cron
 
 - name: Ensure cron daemon is enabled
-  service:
+  ansible.builtin.service:
     name: "{{ crond_service }}"
     enabled: true
     state: started
 
 - name: Ensure permissions on /etc/crontab are configured
-  file:
+  ansible.builtin.file:
     dest: /etc/crontab
     owner: root
     group: root
@@ -44,7 +44,7 @@
     - permissions
 
 - name: Ensure permissions on cron directories are configured
-  file:
+  ansible.builtin.file:
     dest: "{{ item }}"
     state: directory
     owner: root
@@ -61,14 +61,14 @@
     - permissions
 
 - name: Remove /etc/at.deny
-  file:
+  ansible.builtin.file:
     path: /etc/at.deny
     state: absent
   tags:
     - crontab
 
 - name: Copy /etc/at.allow file
-  template:
+  ansible.builtin.template:
     src: at.allow.j2
     dest: /etc/at.allow
     owner: root
@@ -78,14 +78,14 @@
     - crontab
 
 - name: Remove /etc/cron.deny
-  file:
+  ansible.builtin.file:
     path: /etc/cron.deny
     state: absent
   tags:
     - crontab
 
 - name: Copy /etc/cron.allow file
-  template:
+  ansible.builtin.template:
     src: cron.allow.j2
     dest: /etc/cron.allow
     owner: root
@@ -95,7 +95,7 @@
     - crontab
 
 - name: Unconfigure jobs
-  cron:
+  ansible.builtin.cron:
     name: "{{ item.name }}"
     user: "{{ item.user | default('root') }}"
     state: absent
@@ -106,7 +106,7 @@
     - crontab
 
 - name: Configure jobs
-  cron:
+  ansible.builtin.cron:
     minute: "{{ item.value.minute | default('*') }}"
     hour: "{{ item.value.hour | default('*') }}"
     weekday: "{{ item.value.weekday | default('*') }}"
